@@ -80,6 +80,7 @@ proc show_diff {path w {lno {}} {scroll_pos {}} {callback {}}} {
 	global ui_diff ui_index ui_workdir
 	global current_diff_path current_diff_side current_diff_header
 	global current_diff_queue
+	global is_unmerged
 
 	if {$diff_active || ![lock_index read]} return
 
@@ -98,6 +99,7 @@ proc show_diff {path w {lno {}} {scroll_pos {}} {callback {}}} {
 	set s $file_states($path)
 	set m [lindex $s 0]
 	set is_conflict_diff 0
+	set is_unmerged [expr {[string first {U} $m] >= 0}]
 	set current_diff_path $path
 	set current_diff_side $w
 	set current_diff_queue {}
@@ -105,7 +107,7 @@ proc show_diff {path w {lno {}} {scroll_pos {}} {callback {}}} {
 
 	set cont_info [list $scroll_pos $callback]
 
-	if {[string first {U} $m] >= 0} {
+	if {$is_unmerged} {
 		merge_load_stages $path [list show_unmerged_diff $cont_info]
 	} elseif {$m eq {_O}} {
 		show_other_diff $path $w $m $cont_info
@@ -258,6 +260,7 @@ proc start_show_diff {cont_info {add_opts {}}} {
 	global is_3way_diff is_submodule_diff diff_active repo_config
 	global ui_diff ui_index ui_workdir
 	global current_diff_path current_diff_side current_diff_header
+	global is_unmerged
 
 	set path $current_diff_path
 	set w $current_diff_side
@@ -274,7 +277,7 @@ proc start_show_diff {cont_info {add_opts {}}} {
 		lappend cmd diff-index
 		lappend cmd --cached
 	} elseif {$w eq $ui_workdir} {
-		if {[string first {U} $m] >= 0} {
+	        if {$is_unmerged} {
 			lappend cmd diff
 		} else {
 			lappend cmd diff-files
