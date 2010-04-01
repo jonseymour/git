@@ -51,9 +51,15 @@ uninstall::
 clean::
 	$(RM) gitk-wish po/*.msg
 
+OS := $(shell sh -c 'uname -o 2>/dev/null')
+ifeq ($(OS), Cygwin)
+	EXECLINE = argv0=`cygpath --windows --absolute "$$0"`; \\\nexec $(TCLTK_PATH_SQ) "$$argv0" -- "$$@"
+else
+	EXECLINE = exec $(TCLTK_PATH_SQ) "$$0" -- "$$@"
+endif
 gitk-wish: gitk
 	$(QUIET_GEN)$(RM) $@ $@+ && \
-	sed -e '1,3s|^exec .* "$$0"|exec $(subst |,'\|',$(TCLTK_PATH_SQ)) "$$0"|' <gitk >$@+ && \
+	sed -e '1,3s|^exec .*|$(EXECLINE)|' <gitk >$@+ && \
 	chmod +x $@+ && \
 	mv -f $@+ $@
 
