@@ -142,9 +142,10 @@ ifeq ($(uname_O),Cygwin)
 	# Is this a Cygwin Tcl/Tk binary?  If so it knows how to do
 	# POSIX path translation just like cygpath does and we must
 	# keep libdir in POSIX format so Cygwin packages of git-gui
-	# work no matter where the user installs them.
+	# work no matter where the user installs them.  Case insensitive,
+	# since TCL_PATH_SQ and cygpath might disagree.
 	#
-	ifeq ($(shell echo 'puts [file normalize /]' | '$(TCL_PATH_SQ)'),$(shell cygpath --mixed --absolute /))
+	ifeq ($(shell echo 'puts [file normalize /]' | '$(TCL_PATH_SQ)' | tr '[:upper:]' '[:lower:]'),$(shell cygpath --mixed --absolute / | tr '[:upper:]' '[:lower:]'))
 		gg_libdir_sed_in := $(gg_libdir)
 	else
 		gg_libdir_sed_in := $(shell cygpath --windows --absolute "$(gg_libdir)")
