@@ -9050,7 +9050,7 @@ proc resethead {} {
     tkwait window $w
     if {!$confirm_ok} return
     if {[catch {set fd [open \
-	    [list | git reset --$resettype $rowmenuid 2>@1] r]} err]} {
+	    [list | sh -c "git reset --$resettype $rowmenuid 2>&1"] r]} err]} {
 	error_popup $err
     } else {
 	dohidelocalchanges
@@ -9119,7 +9119,7 @@ proc cobranch {} {
     update
     dohidelocalchanges
     if {[catch {
-	set fd [open [list | git checkout $headmenuhead 2>@1] r]
+	set fd [open [list | sh -c "git checkout $headmenuhead 2>&1"] r]
     } err]} {
 	notbusy checkout
 	error_popup $err
