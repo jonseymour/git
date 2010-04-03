@@ -300,6 +300,10 @@ proc start_show_diff {cont_info {add_opts {}}} {
 	}
 	if {$w eq $ui_index} {
 		lappend cmd [PARENT]
+	} else {
+		if {$is_unmerged} {
+			lappend cmd -c 
+		}
 	}
 	if {$add_opts ne {}} {
 		eval lappend cmd $add_opts
