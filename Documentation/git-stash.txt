@@ -115,8 +115,8 @@ branch <branchname> [<stash>]::
 	Creates and checks out a new branch named `<branchname>` starting from
 	the commit at which the `<stash>` was originally created, applies the
 	changes recorded in `<stash>` to the new working tree and index, then
-	drops the `<stash>` if that completes successfully. When no `<stash>`
-	is given, applies the latest one.
+	drops the `<stash>` if that completes successfully and `<stash>` looks like a
+	stash the name of a stash list entry. When no `<stash>` is given, applies the latest one.
 +
 This is useful if the branch on which you ran `git stash save` has
 changed enough that `git stash apply` fails due to conflicts. Since
