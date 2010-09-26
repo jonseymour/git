@@ -49,7 +49,7 @@ OPTIONS
 	'git rev-list' command.
 
 --flags::
-	Do not output non-flag parameters which are not also revisions.
+	Do not output non-flag parameters.
 +
 If specified, this option causes 'git rev-parse' to stop
 interpreting remaining arguments as options for its own
@@ -57,7 +57,7 @@ consumption. As such, this option should be specified
 after all other options that 'git rev-parse' is expected
 to interpret.
 +
-To output only non-flag parameters, also specify `--no-revs`.
+If `--flags` is specified, `--no-revs` is implied.
 
 --no-flags::
 	Do not output flag parameters.

@@ -29,9 +29,9 @@ test_expect_success 'git rev-parse --no-revs --flags HEAD -> ""' \
 	test_cmp expected actual
 '
 
-test_expect_success 'git rev-parse --flags HEAD -> sha1 of HEAD' \
+test_expect_success 'git rev-parse --flags HEAD -> ""' \
 '
-	git rev-parse HEAD > expected &&
+	> expected &&
 	git rev-parse --flags HEAD >actual &&
 	test_cmp expected actual
 '

@@ -521,7 +521,11 @@ int cmd_rev_parse(int argc, const char **argv, const char *prefix)
 				continue;
 			}
 			if (!strcmp(arg, "--flags")) {
-				filter &= ~DO_NONFLAGS;
+				if (!(filter & DO_FLAGS)) {
+					/* prevent --flags being interpreted if --no-flags has been seen */
+					continue;
+				}
+				filter &= ~(DO_NONFLAGS|DO_REVS);
 				continue;
 			}
 			if (!strcmp(arg, "--no-flags")) {
