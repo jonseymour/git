@@ -51,10 +51,20 @@ OPTIONS
 --flags::
 	Do not output non-flag parameters which are not also revisions.
 +
+If specified, this option causes 'git rev-parse' to stop
+interpreting remaining arguments as options for its own
+consumption. As such, this option should be specified
+after all other options that 'git rev-parse' is expected
+to interpret.
++
 To output only non-flag parameters, also specify `--no-revs`.
 
 --no-flags::
 	Do not output flag parameters.
++
+If both `--flags` and `--no-flags` are specified, the first
+option specified wins and the other option is treated like
+a non-option argument.
 
 --default <arg>::
 	If there is no parameter given by the user, use `<arg>`

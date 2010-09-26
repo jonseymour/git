@@ -497,7 +497,15 @@ int cmd_rev_parse(int argc, const char **argv, const char *prefix)
 				/* Pass on the "--" if we show anything but files.. */
 				if (filter & (DO_FLAGS | DO_REVS))
 					show_file(arg);
+				if (!(filter & DO_NONFLAGS)) {
+					return 0;
+				}
 				continue;
+			}
+			if (!(filter & DO_NONFLAGS)) {
+				/* once we see --flags, we stop interpreting other flags */
+				 show_flag(arg);
+				 continue;
 			}
 			if (!strcmp(arg, "--default")) {
 				def = argv[i+1];

@@ -92,16 +92,16 @@ test_expect_success 'git rev-parse --symbolic --no-flags --flags HEAD -> "HEAD"'
 	test_cmp expected actual
 '
 
-test_expect_success 'git rev-parse --flags -q -> ""' \
+test_expect_success 'git rev-parse --flags -q -> "-q"' \
 '
-	>expected &&
+	printf "%s\n" -q > expected &&
 	git rev-parse --flags -q >actual &&
 	test_cmp expected actual
 '
 
-test_expect_success 'git rev-parse --flags --no-flags -> ""' \
+test_expect_success 'git rev-parse --flags --no-flags -> "--no-flags"' \
 '
-	>expected &&
+	printf "%s\n" --no-flags > expected &&
 	git rev-parse --flags --no-flags >actual &&
 	test_cmp expected actual
 '
