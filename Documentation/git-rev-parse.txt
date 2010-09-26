@@ -49,7 +49,9 @@ OPTIONS
 	'git rev-list' command.
 
 --flags::
-	Do not output non-flag parameters.
+	Do not output non-flag parameters which are not also revisions.
++
+To output only non-flag parameters, also specify `--no-revs`.
 
 --no-flags::
 	Do not output flag parameters.
