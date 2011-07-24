@@ -300,6 +300,7 @@ infodir = share/info
 gitexecdir = libexec/git-core
 sharedir = $(prefix)/share
 gitwebdir = $(sharedir)/gitweb
+gitworkdir = $(sharedir)/git-work
 template_dir = share/git-core/templates
 htmldir = share/doc/git-doc
 ETC_GITCONFIG = $(sysconfdir)/gitconfig
@@ -362,6 +363,8 @@ TEST_PROGRAMS_NEED_X =
 unexport CDPATH
 
 SCRIPT_SH += git-am.sh
+SCRIPT_SH += git-atomic.sh
+SCRIPT_SH += git-base.sh
 SCRIPT_SH += git-bisect.sh
 SCRIPT_SH += git-difftool--helper.sh
 SCRIPT_SH += git-filter-branch.sh
@@ -377,8 +380,12 @@ SCRIPT_SH += git-repack.sh
 SCRIPT_SH += git-request-pull.sh
 SCRIPT_SH += git-stash.sh
 SCRIPT_SH += git-submodule.sh
+SCRIPT_SH += git-test.sh
 SCRIPT_SH += git-web--browse.sh
+SCRIPT_SH += git-work.sh
 
+SCRIPT_LIB += git-atomic-lib
+SCRIPT_LIB += git-conditions-lib
 SCRIPT_LIB += git-mergetool--lib
 SCRIPT_LIB += git-parse-remote
 SCRIPT_LIB += git-rebase--am
@@ -386,6 +393,7 @@ SCRIPT_LIB += git-rebase--interactive
 SCRIPT_LIB += git-rebase--merge
 SCRIPT_LIB += git-sh-setup
 SCRIPT_LIB += git-sh-i18n
+SCRIPT_LIB += git-test-lib
 
 SCRIPT_PERL += git-add--interactive.perl
 SCRIPT_PERL += git-difftool.perl
@@ -2360,6 +2368,13 @@ dist-doc:
 	cd .doc-tmp-dir && $(TAR) cf ../$(manpages).tar .
 	gzip -n -9 -f $(manpages).tar
 	$(RM) -r .doc-tmp-dir
+
+dist-git-work:
+	$(RM) -r .gitwork-tmp-dir
+	mkdir .gitwork-tmp-dir
+	zipdir=$$(cd .gitwork-tmp-dir; pwd) && $(MAKE) prefix=$$zipdir install install-man
+	cd .gitwork-tmp-dir && zip -@ ../git-work.zip < ../FILES.git-work
+	$(RM) -r .gitwork-tmp-dir
 
 ### Cleaning rules
 
