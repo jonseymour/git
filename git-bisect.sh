@@ -3,7 +3,7 @@
 USAGE='[help|start|bad|good|skip|next|reset|visualize|replay|log|run]'
 LONG_USAGE='git bisect help
         print this long help message.
-git bisect start [<bad> [<good>...]] [--] [<pathspec>...]
+git bisect start [--no-checkout [--update-ref=<ref>]] [<bad> [<good>...]] [--] [<pathspec>...]
         reset bisect state and start bisection.
 git bisect bad [<rev>]
         mark <rev> a known-bad revision.
@@ -34,6 +34,8 @@ require_work_tree
 _x40='[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]'
 _x40="$_x40$_x40$_x40$_x40$_x40$_x40$_x40$_x40"
 
+BISECT_UPDATE_REF=$(test -f "$GIT_DIR/BISECT_UPDATE_REF" && cat "$GIT_DIR/BISECT_UPDATE_REF")
+
 bisect_autostart() {
 	test -s "$GIT_DIR/BISECT_START" || {
 		(
@@ -59,6 +61,30 @@ bisect_autostart() {
 }
 
 bisect_start() {
+	no_checkout=
+	BISECT_UPDATE_REF=
+	for arg in "$@"; do
+		case "$arg" in
+		--no-checkout)
+			no_checkout=true ;;
+		--update-ref=*)
+			BISECT_UPDATE_REF=$arg ;;
+		--)
+			break; ;;
+		esac
+	done
+
+	if test -z "$no_checkout" -a -n "$BISECT_UPDATE_REF"
+	then
+	    BISECT_UPDATE_REF=
+	    gettext "warn: --update-ref has no effect unless --no-checkout is also specified." >&1
+	fi
+
+	if test -n "$no_checkout" -a -z "$BISECT_UPDATE_REF"
+	then
+	    BISECT_UPDATE_REF=--update-ref=HEAD
+	fi
+
 	#
 	# Verify HEAD.
 	#
@@ -74,7 +100,11 @@ bisect_start() {
 	then
 		# Reset to the rev from where we started.
 		start_head=$(cat "$GIT_DIR/BISECT_START")
-		git checkout "$start_head" -- || exit
+		if test -z "${BISECT_UPDATE_REF}"; then
+		    git checkout "$start_head" --
+		else
+		    git update-ref --no-deref "${BISECT_UPDATE_REF#--update-ref=}" "$start_head"
+		fi
 	else
 		# Get rev from where we start.
 		case "$head" in
@@ -113,6 +143,13 @@ bisect_start() {
 	    --)
 		shift
 		break
+		;;
+	    --update-ref=*|--no-checkout)
+		echo "${BISECT_UPDATE_REF}" > "$GIT_DIR/BISECT_UPDATE_REF"
+		shift
+		;;
+	    --*)
+		die $(gettext "unrecognised option: $arg")
 		;;
 	    *)
 		rev=$(git rev-parse -q --verify "$arg^{commit}") || {
@@ -291,7 +328,7 @@ bisect_next() {
 	bisect_next_check good
 
 	# Perform all bisection computation, display and checkout
-	git bisect--helper --next-all
+	git bisect--helper --next-all "${BISECT_UPDATE_REF}"
 	res=$?
 
         # Check if we should exit because bisection is finished
@@ -340,11 +377,16 @@ bisect_reset() {
 	*)
 	    usage ;;
 	esac
-	if git checkout "$branch" -- ; then
-		bisect_clean_state
-	else
-		die "$(eval_gettext "Could not check out original HEAD '\$branch'.
+	if test -z "${BISECT_UPDATE_REF}"; then
+		if git checkout "$branch" --; then
+			bisect_clean_state
+		else
+			die "$(eval_gettext "Could not check out original HEAD '\$branch'.
 Try 'git bisect reset <commit>'.")"
+		fi
+	else
+	    ref=${BISECT_UPDATE_REF#--update-ref=}
+	    git symbolic-ref "$ref" $(git rev-parse --symbolic-full-name "${branch}")
 	fi
 }
 
@@ -360,6 +402,7 @@ bisect_clean_state() {
 	rm -f "$GIT_DIR/BISECT_LOG" &&
 	rm -f "$GIT_DIR/BISECT_NAMES" &&
 	rm -f "$GIT_DIR/BISECT_RUN" &&
+	rm -f "$GIT_DIR/BISECT_UPDATE_REF" &&
 	# Cleanup head-name if it got left by an old version of git-bisect
 	rm -f "$GIT_DIR/head-name" &&
 
