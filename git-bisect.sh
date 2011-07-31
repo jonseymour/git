@@ -79,8 +79,17 @@ bisect_start() {
 		shift; break ;;
 	    --no-checkout)
 		BISECT_UPDATE_REF=HEAD; shift ;;
-	    --update-ref=*)
-		BISECT_UPDATE_REF=${arg#--update-ref=}; shift ;;
+	    --update-ref*)
+		case "$#,$arg" in
+		*,*=*)
+			BISECT_UPDATE_REF=`expr "z$1" : 'z-[^=]*=\(.*\)'`
+		;;
+		1,*)
+			usage ;;
+		*)
+			BISECT_UPDATE_REF="$2";	shift ;;
+		esac
+		shift ;;
 	    --*)
 		die "$(eval_gettext "unrecognised option: '\$arg'")" ;;
 	    *)
