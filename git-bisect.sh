@@ -230,8 +230,9 @@ bisect_state() {
 	0,*)
 		die "$(gettext "Please call 'bisect_state' with at least one argument.")" ;;
 	1,bad|1,good|1,skip)
-		rev=$(git rev-parse --verify HEAD) ||
-			die "$(gettext "Bad rev input: HEAD")"
+		ref=${BISECT_UPDATE_REF:-HEAD}
+		rev=$(git rev-parse --verify "$ref") ||
+			die "$(gettext "Bad rev input: $ref")"
 		bisect_write "$state" "$rev"
 		check_expected_revs "$rev" ;;
 	2,bad|*,good|*,skip)

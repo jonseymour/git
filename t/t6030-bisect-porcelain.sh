@@ -736,4 +736,19 @@ test \$rc -eq 0;' &&
 	git bisect reset
 "
 
+test_expect_success 'bisect: demonstrate identification of damage boundary using alternate reference' "
+	git bisect reset &&
+	git checkout broken &&
+	git bisect start broken master --no-checkout --update-ref=CURSOR &&
+	git bisect run eval '
+rc=1;
+if git rev-list --objects CURSOR >tmp.$$; then
+   git pack-objects --stdout >/dev/null < tmp.$$ && rc=0;
+fi;
+rm tmp.$$;
+test \$rc -eq 0;' &&
+	check_same BROKEN_HASH6 bisect/bad &&
+	git bisect reset
+"
+
 test_done
