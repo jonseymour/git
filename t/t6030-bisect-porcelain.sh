@@ -705,6 +705,22 @@ test_expect_success 'bisect: --no-checkout --update-ref=CURSOR - check HEAD is u
 	check_same broken $BROKEN
 '
 
+test_expect_success 'bisect: --no-checkout --update-ref CURSOR' '
+	git bisect reset &&
+	git checkout broken &&
+	BROKEN=$(git rev-parse broken) &&
+	git bisect start broken BROKEN_HASH4 --no-checkout --update-ref CURSOR &&
+	check_same CURSOR BROKEN_HASH6 &&
+	test "refs/heads/broken" = "$(git rev-parse --symbolic-full-name HEAD)"
+'
+
+test_expect_success 'bisect: --no-checkout --update-ref -> fails' '
+	git bisect reset &&
+	git checkout broken &&
+	BROKEN=$(git rev-parse broken) &&
+	test_must_fail git bisect start broken BROKEN_HASH4 --no-checkout --update-ref
+'
+
 test_expect_success 'bisect: demonstrate identification of damage boundary' "
 	git bisect reset &&
 	git checkout broken &&
